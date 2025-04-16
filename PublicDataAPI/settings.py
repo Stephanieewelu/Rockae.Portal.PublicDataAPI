@@ -85,6 +85,7 @@ REST_FRAMEWORK = {
     'NON_FIELD_ERRORS_KEY': 'message',
 }
 
+PRODUCTION_URL = config('PRODUCTION_URL', default='https://default-url.app')
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Admin Dashboard API',
     'DESCRIPTION': '''
