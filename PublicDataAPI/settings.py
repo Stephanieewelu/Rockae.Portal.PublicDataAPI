@@ -104,7 +104,7 @@ Authentication:
         'displayOperationId': True,
     },
     'SERVERS': [
-        {'url': 'https://web-production-74eae.up.railway.app', 'description': 'Local Development'},
+        {'url': PRODUCTION_URL, 'description': 'Production'},
         {'url': 'http://127.0.0.1:8000', 'description': 'Local Development'},
     ],
     'SECURITY': [{"ApiKeyAuth": []}],
