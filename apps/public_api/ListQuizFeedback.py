@@ -6,19 +6,16 @@ from rest_framework import status
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from apps.contract.models import QuizFeedback
 from rest_framework import serializers
-from apps.contract.models import QuizFeedback
 
 class QuizFeedbackSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = QuizFeedback
-        # Return only the fields we are interested in.
-        fields = ('title', 'message', 'rating', 'full_name', 'email')
+        fields = ('title', 'message', 'rating', 'full_name', 'email', 'quiz')
 
     def get_full_name(self, obj) -> str:
         return f"{obj.firstname} {obj.lastname}".strip()
-
 
 
 @extend_schema(
@@ -50,6 +47,12 @@ class QuizFeedbackSerializer(serializers.ModelSerializer):
             description="Filter by email address (case-insensitive partial match)"
         ),
         OpenApiParameter(
+            name="quiz",
+            type=int,
+            location=OpenApiParameter.QUERY,
+            description="Filter by quiz ID"
+        ),
+        OpenApiParameter(
             name="page",
             type=int,
             location=OpenApiParameter.QUERY,
@@ -70,46 +73,53 @@ class QuizFeedbackSerializer(serializers.ModelSerializer):
     description=(
         "Retrieves a paginated list of quiz feedback records containing only title, message, rating, "
         "the creator's full name (combining firstname and lastname), and email. "
-        "You can filter by title, full_name, and email. "
+        "You can filter by title, full_name, email, and quiz. "
         "The most recent feedback records are returned first."
     ),
     tags=["Quiz Feedback"]
 )
 @api_view(['GET'])
 def list_quiz_feedback(request):
-    # Retrieve all QuizFeedback records, ordered by most recent first.
+    # Base queryset, newest first
     feedbacks = QuizFeedback.objects.all().order_by('-create_date')
 
-    # Optional filtering parameters
-    title = request.query_params.get('title')
+    # Extract filters
+    title     = request.query_params.get('title')
     full_name = request.query_params.get('full_name')
-    email = request.query_params.get('email')
+    email     = request.query_params.get('email')
+    quiz_id   = request.query_params.get('quiz')
 
+    # Apply filters
     if title:
         feedbacks = feedbacks.filter(title__icontains=title)
+
     if full_name:
         feedbacks = feedbacks.filter(
             Q(firstname__icontains=full_name) | Q(lastname__icontains=full_name)
         )
+
     if email:
         feedbacks = feedbacks.filter(email__icontains=email)
 
-    # Apply pagination with defaults
-    page = request.query_params.get('page', 1)
+    if quiz_id:
+        print(quiz_id)
+        feedbacks = feedbacks.filter(quiz=quiz_id)
+
+    # Paginate
+    page      = request.query_params.get('page', 1)
     page_size = request.query_params.get('page_size', 10)
     paginator = Paginator(feedbacks, page_size)
     try:
-        feedbacks_page = paginator.page(page)
+        page_obj = paginator.page(page)
     except PageNotAnInteger:
-        feedbacks_page = paginator.page(1)
+        page_obj = paginator.page(1)
     except EmptyPage:
-        feedbacks_page = paginator.page(paginator.num_pages)
+        page_obj = paginator.page(paginator.num_pages)
 
-    serializer = QuizFeedbackSerializer(feedbacks_page, many=True)
-    response_data = {
+    serializer = QuizFeedbackSerializer(page_obj, many=True)
+    return Response({
         "count": paginator.count,
         "num_pages": paginator.num_pages,
-        "current_page": feedbacks_page.number,
+        "current_page": page_obj.number,
         "results": serializer.data
-    }
-    return Response(response_data, status=status.HTTP_200_OK)
+    }, status=status.HTTP_200_OK)
