@@ -12,7 +12,7 @@ class QuizFeedbackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuizFeedback
-        fields = ('title', 'message', 'rating', 'full_name', 'email', 'quiz')
+        fields = ('title', 'message', 'rating', 'full_name', 'email', 'quiz','create_date')
 
     def get_full_name(self, obj) -> str:
         return f"{obj.firstname} {obj.lastname}".strip()
