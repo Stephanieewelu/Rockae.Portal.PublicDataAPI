@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Avg
 from django.db.models import Count
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -10,6 +10,7 @@ from rest_framework import serializers
 
 class QuizSerializer(serializers.ModelSerializer):
     attempts = serializers.IntegerField(read_only=True)
+    average_rating = serializers.FloatField(read_only=True)
     creator_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -109,7 +110,8 @@ def list_quizzes_in_hallofquiz(request):
 
     # Annotate each quiz with "attempts" (i.e. number of related QuizSubmission records)
     quizzes = quizzes.annotate(
-        attempts=Count('quizsubmission')
+        attempts=Count('quizsubmission'),
+        average_rating=Avg('quizfeedback__rating')
     ).order_by('-attempts')
 
     # Pagination parameters with defaults
