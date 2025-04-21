@@ -116,7 +116,7 @@ def list_quizzes_in_hallofquiz(request):
 
     # Pagination parameters with defaults
     page = request.query_params.get('page', 1)
-    page_size = request.query_params.get('page_size', 10)
+    page_size = request.query_params.get('page_size', 12)
 
     paginator = Paginator(quizzes, page_size)
     try:
