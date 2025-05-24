@@ -3,7 +3,7 @@ from django.utils import timezone
 
 # Define the User model
 class User(models.Model):
-    # The username of the user, must be unique
+    # This is a comment for the User model
     username = models.CharField(max_length=255, unique=True)
     # The email of the user, must be unique
     email = models.EmailField(unique=True)
