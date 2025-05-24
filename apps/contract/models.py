@@ -3,8 +3,11 @@ from django.utils import timezone
 
 # Define the User model
 class User(models.Model):
+    # The username of the user, must be unique
     username = models.CharField(max_length=255, unique=True)
+    # The email of the user, must be unique
     email = models.EmailField(unique=True)
+    # The date the user joined, defaults to the current time
     date_joined = models.DateTimeField(default=timezone.now) 
     is_active = models.BooleanField(default=True)
     user_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
@@ -20,7 +23,9 @@ class User(models.Model):
 
 # Define the Quiz model
 class Quiz(models.Model):
+    # The title of the quiz
     quiz_title = models.CharField(max_length=255)
+    # A brief description of the quiz
     description = models.TextField(blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     create_date = models.DateTimeField(auto_now_add=True)
@@ -51,7 +56,9 @@ class Quiz(models.Model):
 
 # Define the Question model
 class Question(models.Model):
+    # The quiz to which this question belongs
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
+    # The text of the question
     text = models.TextField()
 
     def __str__(self):
@@ -62,8 +69,11 @@ class Question(models.Model):
         verbose_name = 'Question'
         verbose_name_plural = 'Questions'
 
+# Define the AnswerOption model
 class AnswerOption(models.Model):
+    # The question to which this answer option belongs
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="options")
+    # The label of the answer option, e.g., A, B, C
     label = models.CharField(max_length=1)  # A, B, C, etc.
     text = models.TextField()
     is_correct = models.BooleanField(default=False)
