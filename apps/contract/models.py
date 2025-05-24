@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+# Define the User model
 class User(models.Model):
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
@@ -17,6 +18,7 @@ class User(models.Model):
     def __str__(self):
         return self.username
 
+# Define the Quiz model
 class Quiz(models.Model):
     quiz_title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -47,6 +49,7 @@ class Quiz(models.Model):
         verbose_name = 'Quiz'
         verbose_name_plural = 'Quizzes'
 
+# Define the Question model
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
     text = models.TextField()
